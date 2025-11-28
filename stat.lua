@@ -124,47 +124,36 @@ local function getPlayerData()
         end
     end
 
+    -- ===== MELEE =====
+    local character = LocalPlayer.Character
     local meleeList = {
-        "Combat",
-        "Superhuman",
-        "Electric Claw",
-        "Dragon Talon",
-        "Sharkman Karate",
-        "Death Step",
-        "Godhuman",
-        "Sanguine Art"
+        "Combat", "Superhuman", "Electric Claw", "Dragon Talon",
+        "Sharkman Karate", "Death Step", "Godhuman", "Sanguine Art"
     }
 
-    local function findEquippedMelee()
-        local backpack = LocalPlayer:FindFirstChild("Backpack")
-        if not backpack then return nil end
-
-        for _, melee in ipairs(meleeList) do
-            if backpack:FindFirstChild(melee) then
-                return melee
+    local function isMelee(name)
+        for _, m in ipairs(meleeList) do
+            if string.lower(name) == string.lower(m) then
+                return true
             end
         end
-
-        return nil
+        return false
     end
 
+    local equippedMelee = nil
 
-    -- ===== MELEE =====
-    local melee = findEquippedMelee()
-    if melee then
-        playerData.Equipment.EquippedMelee = melee
-    else
-        playerData.Equipment.EquippedMelee = "None"
+    if character then
+        for _, tool in ipairs(character:GetChildren()) do
+            if tool:IsA("Tool") and isMelee(tool.Name) then
+                equippedMelee = tool.Name
+                _G.LastKnownMelee = tool.Name -- UPDATE JIKA MELEE ADA
+                break
+            end
+        end
     end
-    
-    -- ===== MELEE =====
-    local dataFolder = LocalPlayer:FindFirstChild("Data")
-    if dataFolder and dataFolder:FindFirstChild("FightingStyle") then
-        local fs = dataFolder.FightingStyle.Value
-        playerData.Equipment.EquippedMelee = fs ~= "" and fs or "None"
-    else
-        playerData.Equipment.EquippedMelee = "None"
-    end
+
+    -- Jika sedang pegang sword → pakai melee yang terakhir kali digunakan
+    playerData.Equipment.EquippedMelee = equippedMelee or _G.LastKnownMelee
 
 
     -- ===== INVENTORY =====
